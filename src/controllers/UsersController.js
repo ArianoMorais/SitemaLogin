@@ -1,6 +1,4 @@
-// const {hash} = require('bcryptjs')
-
-
+const {hash , compare} = require('bcryptjs')
 const AppError = require('../utils/AppError')
 const sqliteConnection= require('../database/sqlite')
 
@@ -16,9 +14,9 @@ class UsersController {
             throw new AppError('Email ja existe!', 400)
         }
 
-        // const hashedPassword = hash(password, 8)
+        const hashedPassword = await hash(password, 8)
 
-        await database.run('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name,email,password])
+        await database.run('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name,email,hashedPassword])
 
         return res.status(201).json()
     }
@@ -63,7 +61,7 @@ class UsersController {
 
         if (password && old_password) {
 
-            const checkOldPassword = user.password == old_password
+            const checkOldPassword = await compare(old_password, user.password)
 
             if (!checkOldPassword) {
 
